@@ -1,4 +1,5 @@
 #include <fs/fs.h>
+#include <string.h>
 
 #define blockSz  32768 * 1024
 uint8_t* block;
@@ -15,7 +16,7 @@ void fs_read_byte(uint32_t address, uint8_t* data) {
 void fsInit(void) {
     
     block = (uint8_t*)malloc(blockSz);
-    
+    memset(block, ' ', blockSz);
 }
 
 uint8_t DeviceHeaderString[] = {0x13, 'f','s',' ',' ',' ',' ',' ',' ',' ',' '};
@@ -61,6 +62,13 @@ uint32_t fsDeviceGetSectorSize(struct Partition part) {
     return *((uint32_t*)&sizeBytes[0]);
 }
 
+DirectoryHandle fsDeviceGetRootDirectory(struct Partition part) {
+    uint8_t ptrBytes[4];
+    for (uint8_t i=0; i < 4; i++) 
+        fs_read_byte(part.block_address + i + DEVICE_OFFSET_SECT_SZ, &ptrBytes[i]);
+    return *((uint32_t*)&ptrBytes[0]);
+}
+
 void fsDeviceFormat(struct Partition part, uint32_t begin, uint32_t end, uint32_t sectorSize) {
     // Zero the array of sectors
     for (unsigned int i=0; i < end; i++) 
@@ -89,8 +97,10 @@ void fsDeviceFormat(struct Partition part, uint32_t begin, uint32_t end, uint32_
     fs_write_byte(part.block_address + DEVICE_OFFSET_TYPE, deviceType);
     
     // Set the root directory pointer
+    DirectoryHandle handle = fsDirectoryCreate(part, (uint8_t*)"root");
+    
     uint8_t ptrBytes[4];
-    *((uint32_t*)&ptrBytes[0]) = 0; // set address to root directory here
+    *((uint32_t*)&ptrBytes[0]) = handle;
     for (uint8_t i=0; i < 4; i++) 
         fs_write_byte(part.block_address + i + DEVICE_OFFSET_ROOT, ptrBytes[i]);
     

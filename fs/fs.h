@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define MAX_OPEN_FILES  16
+
 #define SECTOR_FREE    '?'
 #define SECTOR_HEADER  'U'
 #define SECTOR_USED    'D'
@@ -23,7 +25,7 @@
 
 typedef uint32_t FileHandle;
 typedef uint32_t DirectoryHandle;
-typedef uint8_t* Filename;
+typedef int32_t  File;
 
 struct Partition {
     uint32_t block_address;
@@ -44,6 +46,7 @@ void fs_read_byte(uint32_t address, uint8_t* data);
 struct Partition fsDeviceOpen(uint32_t deviceAddress);
 uint32_t fsDeviceGetSize(struct Partition part);
 uint32_t fsDeviceGetSectorSize(struct Partition part);
+DirectoryHandle fsDeviceGetRootDirectory(struct Partition part);
 
 void fsDeviceFormat(struct Partition part, uint32_t begin, uint32_t end, uint32_t sectorSize);
 
@@ -58,14 +61,23 @@ void fsFree(struct Partition part, uint32_t address);
 // Directories
 
 DirectoryHandle fsDirectoryCreate(struct Partition part, uint8_t* filename);
+DirectoryHandle fsDirectoryDelete(struct Partition part, DirectoryHandle handle);
+
+void fsDirectorySetReferenceCount(struct Partition part, DirectoryHandle handle, uint32_t count);
+uint32_t fsDirectoryGetReferenceCount(struct Partition part, DirectoryHandle handle);
+
+uint8_t fsDirectoryAddFile(struct Partition part, DirectoryHandle handle, uint32_t file);
+uint8_t fsDirectoryRemoveFile(struct Partition part, DirectoryHandle handle, uint32_t file);
 
 // File IO
 
+File fsFileOpen(struct Partition part, FileHandle handle);
+uint8_t fsFileClose(File index);
+uint8_t fsFileWrite(struct Partition part, File index, uint8_t* buffer, uint32_t size);
+uint8_t fsFileRead(struct Partition part, File index, uint8_t* buffer, uint32_t size);
+
 void fsFileSetName(struct Partition part, FileHandle handle, uint8_t* name);
 void fsFileGetName(struct Partition part, FileHandle handle, uint8_t* name);
-
-void fsFileSetReferenceCount(struct Partition part, FileHandle handle, uint32_t count);
-uint32_t fsFileGetReferenceCount(struct Partition part, FileHandle handle);
 
 uint32_t fsFileGetSize(struct Partition part, FileHandle handle);
 
@@ -74,5 +86,9 @@ void fsFileGetAttributes(struct Partition part, FileHandle handle, uint8_t* attr
 
 void fsFileSetFlag(struct Partition part, FileHandle handle, uint8_t index, uint8_t state);
 uint8_t fsFileGetFlag(struct Partition part, FileHandle handle, uint8_t index);
+
+// Virtual file system
+
+uint8_t vfsList(struct Partition part, DirectoryHandle handle);
 
 #endif

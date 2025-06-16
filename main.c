@@ -15,9 +15,9 @@ int main() {
     fsInit();
     
     struct Partition partA = fsDeviceOpen(0x00000000);
-    struct Partition partB = fsDeviceOpen(0x00000400);
-    fsDeviceFormat(partA, 0x000, 0x400, 32);
-    fsDeviceFormat(partB, 0x400, 0x800, 32);
+    //struct Partition partB = fsDeviceOpen(0x00000500);
+    fsDeviceFormat(partA, 0x000, 0x500, 32);
+    //fsDeviceFormat(partB, 0x500, 0xa00, 32);
     
     struct Partition part = fsDeviceOpen(0x00000000);
     
@@ -26,20 +26,20 @@ int main() {
         return -304;
     }
     
-    DirectoryHandle handle = fsDirectoryCreate(part, (uint8_t*)"root");
+    //DirectoryHandle handle = fsDirectoryCreate(part, (uint8_t*)"root");
     
-    //FileHandle handleA = fsFileCreate(part, (uint8_t*)"file_name", 0x0);
-    //FileHandle handleB = fsFileCreate(part, (uint8_t*)"fileWTF", 0x0);
+    DirectoryHandle handle = fsDeviceGetRootDirectory(part);
     
-    //if (handleA == 0 || handleB == 0) {
-    //    printf("File creation error\n\n");
-    //    return -304;
-    //}
     
-    //fsFileDelete(part, handleA);
+    for (uint8_t i=0; i < 8; i++) {
+        uint8_t filename[] = "test ";
+        filename[4] = ('A' + i);
+        FileHandle fileHandle = fsFileCreate(part, filename, 31);
+        
+        fsDirectoryAddFile(part, handle, fileHandle);
+    }
     
-    //fsFileSetAttributes(part, handle, (uint8_t*)"WXXZ");
-    
+    vfsList(part, handle);
     
     
     
@@ -48,7 +48,7 @@ int main() {
     uint8_t horzCount = 0;
     for (unsigned int i=0; i < 2048; i++) {
         character[0] = block[i];
-        if (character[0] < 0x20) character[0] = 0x20;
+        if (character[0] < 0x20) character[0] += 0xb0;
         printf(character);
         if (horzCount == 127) {
             character[0] = '\n';
