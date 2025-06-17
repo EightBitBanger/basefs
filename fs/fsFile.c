@@ -13,6 +13,10 @@ FileHandle fsFileCreate(struct Partition part, uint8_t* filename, uint32_t size)
     uint8_t attributes[] = " rw ";
     fsFileSetAttributes(part, handle, attributes);
     
+    // Extent chain
+    fsFileSetNextAddress(part, handle, 0);
+    fsFileSetParentAddress(part, handle, 0);
+    
     // Set default flag
     fs_write_byte(part.block_address + handle + FILE_OFFSET_FLAG, 0x00);
     return handle;
@@ -123,9 +127,14 @@ uint8_t fsFileRead(struct Partition part, File index, uint8_t* buffer, uint32_t 
 
 
 void fsFileGetName(struct Partition part, FileHandle handle, uint8_t* name) {
+    //for (uint8_t i=0; i < 10; i++) 
+    //    name[i] = ' ';
     for (uint8_t i=0; i < 10; i++) {
-        if (name[i] == '\0') break;
         fs_read_byte(part.block_address + handle + i + FILE_OFFSET_NAME, &name[i]);
+        if (name[i] == '\0') {
+            name[i] = ' ';
+            break;
+        }
     }
     return;
 }
@@ -134,7 +143,7 @@ void fsFileSetName(struct Partition part, FileHandle handle, uint8_t* name) {
     // Clean up the file name
     uint8_t filename[10];
     for (uint32_t i=0; i < 10; i++) 
-        filename[i] = '\0';
+        filename[i] = ' ';
     for (uint32_t i=0; i < 10; i++) {
         if (name[i] == '\0') 
             break;
@@ -153,13 +162,13 @@ uint32_t fsFileGetSize(struct Partition part, FileHandle handle) {
 }
 
 void fsFileSetAttributes(struct Partition part, FileHandle handle, uint8_t* attributes) {
-    for (uint32_t i=0; i < 10; i++) 
+    for (uint32_t i=0; i < 4; i++) 
         fs_write_byte(part.block_address + handle + i + FILE_OFFSET_ATTRIBUTES, attributes[i]);
     return;
 }
 
 void fsFileGetAttributes(struct Partition part, FileHandle handle, uint8_t* attributes) {
-    for (uint32_t i=0; i < 10; i++) 
+    for (uint32_t i=0; i < 4; i++) 
          fs_read_byte(part.block_address + handle + i + FILE_OFFSET_ATTRIBUTES, &attributes[i]);
     return;
 }
@@ -199,9 +208,9 @@ uint32_t fsFileGetParentAddress(struct Partition part, FileHandle handle) {
 }
 
 
-void fsFileSetNextAddress(struct Partition part, FileHandle handle, uint32_t parent) {
+void fsFileSetNextAddress(struct Partition part, FileHandle handle, uint32_t next) {
     uint8_t ptrBytes[4];
-    *((uint32_t*)&ptrBytes[0]) = parent;
+    *((uint32_t*)&ptrBytes[0]) = next;
     for (uint8_t i=0; i < 4; i++) 
         fs_write_byte(part.block_address + handle + i + FILE_OFFSET_NEXT, ptrBytes[i]);
     return;

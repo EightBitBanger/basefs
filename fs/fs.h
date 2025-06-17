@@ -62,6 +62,7 @@ void fsFree(struct Partition part, uint32_t address);
 
 DirectoryHandle fsDirectoryCreate(struct Partition part, uint8_t* filename);
 DirectoryHandle fsDirectoryDelete(struct Partition part, DirectoryHandle handle);
+DirectoryHandle fsDirectoryExtentCreate(struct Partition part, uint32_t parentPtr, uint32_t nextPtr);
 
 void fsDirectorySetReferenceCount(struct Partition part, DirectoryHandle handle, uint32_t count);
 uint32_t fsDirectoryGetReferenceCount(struct Partition part, DirectoryHandle handle);
@@ -86,6 +87,12 @@ void fsFileGetAttributes(struct Partition part, FileHandle handle, uint8_t* attr
 
 void fsFileSetFlag(struct Partition part, FileHandle handle, uint8_t index, uint8_t state);
 uint8_t fsFileGetFlag(struct Partition part, FileHandle handle, uint8_t index);
+
+void fsFileSetParentAddress(struct Partition part, FileHandle handle, uint32_t parent);
+uint32_t fsFileGetParentAddress(struct Partition part, FileHandle handle);
+
+void fsFileSetNextAddress(struct Partition part, FileHandle handle, uint32_t next);
+uint32_t fsFileGetNextAddress(struct Partition part, FileHandle handle);
 
 // Virtual file system
 

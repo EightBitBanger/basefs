@@ -15,9 +15,7 @@ int main() {
     fsInit();
     
     struct Partition partA = fsDeviceOpen(0x00000000);
-    //struct Partition partB = fsDeviceOpen(0x00000500);
-    fsDeviceFormat(partA, 0x000, 0x500, 32);
-    //fsDeviceFormat(partB, 0x500, 0xa00, 32);
+    fsDeviceFormat(partA, 0x000, 0x800, 32);
     
     struct Partition part = fsDeviceOpen(0x00000000);
     
@@ -26,21 +24,18 @@ int main() {
         return -304;
     }
     
-    //DirectoryHandle handle = fsDirectoryCreate(part, (uint8_t*)"root");
-    
     DirectoryHandle handle = fsDeviceGetRootDirectory(part);
     
-    
-    for (uint8_t i=0; i < 8; i++) {
-        uint8_t filename[] = "test ";
-        filename[4] = ('A' + i);
-        FileHandle fileHandle = fsFileCreate(part, filename, 31);
+    for (uint8_t i=0; i < 32; i++) {
+        uint8_t filename[] = "new file( )";
+        filename[9] = 'A' + i;
+        FileHandle fileHandle = fsFileCreate(part, filename, 20);
         
         fsDirectoryAddFile(part, handle, fileHandle);
     }
     
     vfsList(part, handle);
-    
+    return 0;
     
     
     // Print the byte layout
