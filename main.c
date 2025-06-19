@@ -91,8 +91,8 @@ int main() {
         }
         
         if (_kbhit()) {
-            char c = _getch();  // Reads the character
-            break;              // Exit loop
+            _getch();
+            break;
         }
         
         for (uint8_t i=0; i < numberOfTestFiles; i++) {

@@ -23,8 +23,9 @@
 #define FILE_OFFSET_PARENT        24
 #define FILE_OFFSET_NEXT          28
 
-#define FS_FILE_INVALID   (-1)
-#define FS_FILE_SUCCESS   (0)
+#define FS_FILE_NOT_FOUND   (-2)
+#define FS_FILE_INVALID     (-1)
+#define FS_FILE_SUCCESS     (0)
 
 typedef uint32_t FileHandle;
 typedef uint32_t DirectoryHandle;
