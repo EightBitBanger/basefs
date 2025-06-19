@@ -4,6 +4,8 @@
 #include <fs/fs.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <conio.h>
+
 
 extern uint8_t* block;
 void DrawConsoleOutput(struct Partition part) {
@@ -67,19 +69,18 @@ int main() {
     }
     
     DirectoryHandle rootHandle = fsDeviceGetRootDirectory(part);
-    uint32_t numberOfTestFiles = 64;
+    uint32_t numberOfTestFiles = 128;
+    for (uint8_t i=0; i < numberOfTestFiles; i++) {
+        uint8_t filename[] = "file( )";
+        filename[5] = 'A' + i;
+        FileHandle fileHandle = fsFileCreate(part, filename, 20);
+        
+        fsDirectoryAddFile(part, rootHandle, fileHandle);
+    }
+    
+    DrawConsoleOutput(part);
     
     while (1) {
-        for (uint8_t i=0; i < numberOfTestFiles; i++) {
-            uint8_t filename[] = "file( )";
-            filename[5] = 'A' + i;
-            FileHandle fileHandle = fsFileCreate(part, filename, 20);
-            
-            fsDirectoryAddFile(part, rootHandle, fileHandle);
-        }
-        
-        //DrawConsoleOutput(part);
-        //usleep(100 * 1000);
         
         for (uint8_t i=0; i < numberOfTestFiles; i++) {
             uint8_t filename[] = "file( )";
@@ -89,14 +90,28 @@ int main() {
             fsDirectoryRemoveFile(part, rootHandle, fileHandle);
         }
         
-        //DrawConsoleOutput(part);
-        //usleep(100 * 1000);
+        if (_kbhit()) {
+            char c = _getch();  // Reads the character
+            break;              // Exit loop
+        }
+        
+        for (uint8_t i=0; i < numberOfTestFiles; i++) {
+            uint8_t filename[] = "file( )";
+            filename[5] = 'A' + i;
+            FileHandle fileHandle = fsFileCreate(part, filename, 20);
+            
+            fsDirectoryAddFile(part, rootHandle, fileHandle);
+        }
         
     }
+    
+    DrawConsoleOutput(part);
+    usleep(100 * 1000);
     
     free(block);
     
     printf("\n\n");
+    while(1){}
     return 0;
 }
 
