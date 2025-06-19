@@ -3,51 +3,14 @@
 
 #include <fs/fs.h>
 #include <stdio.h>
+#include <unistd.h>
 
 extern uint8_t* block;
-
-int main() {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD bufferSize = { 640, 480};
-    SetConsoleScreenBufferSize(hConsole, bufferSize);
+void DrawConsoleOutput(struct Partition part) {
     
-    fsInit();
+    system("cls");
     
-    struct Partition partA = fsDeviceOpen(0x00000000);
-    fsDeviceFormat(partA, 0x000, 0x8000, 32);
-    
-    struct Partition part = fsDeviceOpen(0x00000000);
-    
-    if (part.block_size == 0) {
-        printf("Device not ready\n\n");
-        return -304;
-    }
-    
-    DirectoryHandle rootHandle = fsDeviceGetRootDirectory(part);
-    
-    
-    for (uint32_t aa=0; aa < 8; aa++) {
-    
-    for (uint8_t i=0; i < 8; i++) {
-        uint8_t filename[] = "file( )";
-        filename[5] = 'A' + i;
-        FileHandle fileHandle = fsFileCreate(part, filename, 20);
-        
-        fsDirectoryAddFile(part, rootHandle, fileHandle);
-    }
-    
-    for (uint8_t i=0; i < 1; i++) {
-        uint8_t filename[] = "file( )";
-        filename[5] = 'A' + i;
-        
-        uint32_t fileHandle = fsDirectoryFindByName(part, rootHandle, filename);
-        fsDirectoryRemoveFile(part, rootHandle, fileHandle);
-    }
-    
-    }
-    
-    vfsList(part, rootHandle);
-    
+    //vfsList(part, rootHandle);
     
     // Print the byte layout
     char character[ ] = {' ', '\0'};
@@ -81,6 +44,54 @@ int main() {
         } else {
             horzCount++;
         }
+    }
+    return;
+}
+
+
+int main() {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD bufferSize = { 640, 480};
+    SetConsoleScreenBufferSize(hConsole, bufferSize);
+    
+    fsInit();
+    
+    struct Partition partA = fsDeviceOpen(0x00000000);
+    fsDeviceFormat(partA, 0x000, 0x8000, 32);
+    
+    struct Partition part = fsDeviceOpen(0x00000000);
+    
+    if (part.block_size == 0) {
+        printf("Device not ready\n\n");
+        return -304;
+    }
+    
+    DirectoryHandle rootHandle = fsDeviceGetRootDirectory(part);
+    uint32_t numberOfTestFiles = 64;
+    
+    while (1) {
+        for (uint8_t i=0; i < numberOfTestFiles; i++) {
+            uint8_t filename[] = "file( )";
+            filename[5] = 'A' + i;
+            FileHandle fileHandle = fsFileCreate(part, filename, 20);
+            
+            fsDirectoryAddFile(part, rootHandle, fileHandle);
+        }
+        
+        //DrawConsoleOutput(part);
+        //usleep(100 * 1000);
+        
+        for (uint8_t i=0; i < numberOfTestFiles; i++) {
+            uint8_t filename[] = "file( )";
+            filename[5] = 'A' + i;
+            
+            uint32_t fileHandle = fsDirectoryFindByName(part, rootHandle, filename);
+            fsDirectoryRemoveFile(part, rootHandle, fileHandle);
+        }
+        
+        //DrawConsoleOutput(part);
+        //usleep(100 * 1000);
+        
     }
     
     free(block);
