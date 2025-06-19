@@ -17,6 +17,8 @@ DirectoryHandle fsDirectoryDelete(struct Partition part, DirectoryHandle handle)
     
     // TODO Purge any files / directories currently in this directory
     
+    
+    
     fsFileDelete(part, handle);
     
     return handle;
