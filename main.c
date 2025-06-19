@@ -11,7 +11,6 @@ int main() {
     COORD bufferSize = { 640, 480};
     SetConsoleScreenBufferSize(hConsole, bufferSize);
     
-    
     fsInit();
     
     struct Partition partA = fsDeviceOpen(0x00000000);
