@@ -12,9 +12,6 @@ uint8_t vfsList(struct Partition part, DirectoryHandle handle) {
         
         fsFileRead(part, index, buffer, directorySize);
         
-        //printf(" %u", refCount);
-        //printf("\n");
-        
         // Run file list
         for (uint32_t i=0; i < refCount; i++) {
             uint8_t ptrBytes[4];
@@ -22,6 +19,10 @@ uint8_t vfsList(struct Partition part, DirectoryHandle handle) {
                 ptrBytes[a] = buffer[ (i * 4) + a ];
             
             uint32_t fileHandle = *((uint32_t*)&ptrBytes[0]);
+            
+            if (fileHandle == 0) 
+                continue;
+            
             uint32_t fileSize = fsFileGetSize(part, fileHandle);
             
             // Print attributes

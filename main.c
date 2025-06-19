@@ -14,7 +14,7 @@ int main() {
     fsInit();
     
     struct Partition partA = fsDeviceOpen(0x00000000);
-    fsDeviceFormat(partA, 0x000, 0x800, 32);
+    fsDeviceFormat(partA, 0x000, 0x8000, 32);
     
     struct Partition part = fsDeviceOpen(0x00000000);
     
@@ -26,7 +26,9 @@ int main() {
     DirectoryHandle rootHandle = fsDeviceGetRootDirectory(part);
     
     
-    for (uint8_t i=0; i < 4; i++) {
+    for (uint32_t aa=0; aa < (1024 * 32); aa++) {
+    
+    for (uint8_t i=0; i < 32; i++) {
         uint8_t filename[] = "file( )";
         filename[5] = 'A' + i;
         FileHandle fileHandle = fsFileCreate(part, filename, 20);
@@ -34,18 +36,14 @@ int main() {
         fsDirectoryAddFile(part, rootHandle, fileHandle);
     }
     
-    uint8_t filename[] = "file(E)";
-    uint32_t fileHandle = fsDirectoryFindByName(part, rootHandle, filename);
-    
-    if (fileHandle != 0) {
+    for (uint8_t i=0; i < 32; i++) {
+        uint8_t filename[] = "file( )";
+        filename[5] = 'A' + i;
         
-        printf("File found!\n");
-        
+        uint32_t fileHandle = fsDirectoryFindByName(part, rootHandle, filename);
+        fsDirectoryRemoveFile(part, rootHandle, fileHandle);
     }
-    
-    //fsDirectoryRemoveFile(part, handle, 0);
-    
-    
+    }
     
     vfsList(part, rootHandle);
     

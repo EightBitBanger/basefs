@@ -17,8 +17,6 @@ DirectoryHandle fsDirectoryDelete(struct Partition part, DirectoryHandle handle)
     
     // TODO Purge any files / directories currently in this directory
     
-    
-    
     fsFileDelete(part, handle);
     
     return handle;
@@ -78,7 +76,7 @@ uint8_t fsDirectoryAddFile(struct Partition part, DirectoryHandle handle, uint32
                 uint32_t extentRefCount = fsDirectoryGetReferenceCount(part, extent);
                 if (((extentRefCount+2) * 4) >= part.sector_size) {
                     
-                    // Check if no further extents exist
+                    // Check end of extent list
                     DirectoryHandle nextExtent = fsFileGetNextAddress(part, extent);
                     if (nextExtent == 0) {
                         
@@ -127,7 +125,7 @@ uint8_t fsDirectoryAddFile(struct Partition part, DirectoryHandle handle, uint32
 }
 
 uint32_t fsDirectoryFindByName(struct Partition part, DirectoryHandle handle, uint8_t* filename) {
-    uint8_t buffer[256];
+    uint8_t buffer[64];
     
     // Cleanse the source file name
     uint8_t sourceFilename[] = "          ";
@@ -145,27 +143,22 @@ uint32_t fsDirectoryFindByName(struct Partition part, DirectoryHandle handle, ui
         
         fsFileRead(part, index, buffer, directorySize);
         
-        // Run file list
+        // Check the list of files in this extent
         for (uint32_t i=0; i < refCount; i++) {
             uint8_t ptrBytes[4];
             for (uint8_t a=0; a < 4; a++) 
                 ptrBytes[a] = buffer[ (i * 4) + a ];
             
             uint32_t fileHandle = *((uint32_t*)&ptrBytes[0]);
-            //uint32_t fileSize = fsFileGetSize(part, fileHandle);
             
-            // Print attributes
-            //uint8_t fileAttr[] = "    ";
-            //fsFileGetAttributes(part, fileHandle, fileAttr);
-            //fileAttr[3] = '\0';
-            
-            //printf((char*)fileAttr);
-            //printf(" ");
             uint8_t name[] = "          ";
             fsFileGetName(part, fileHandle, name);
             
-            if (strcmp((char*)name, (char*)sourceFilename) == 0) 
-                return 1;
+            if (strcmp((char*)name, (char*)sourceFilename) != 0) 
+                continue;
+            
+            fsFileClose(index);
+            return fileHandle;
         }
         fsFileClose(index);
         
@@ -179,7 +172,8 @@ uint32_t fsDirectoryFindByName(struct Partition part, DirectoryHandle handle, ui
 
 
 uint8_t fsDirectoryRemoveFile(struct Partition part, DirectoryHandle handle, uint32_t file) {
-    uint8_t buffer[256];
+    uint8_t buffer[64];
+    uint8_t extentCount = 0;
     
     while (1) {
         uint32_t refCount = fsDirectoryGetReferenceCount(part, handle);
@@ -189,36 +183,46 @@ uint8_t fsDirectoryRemoveFile(struct Partition part, DirectoryHandle handle, uin
         
         fsFileRead(part, index, buffer, directorySize);
         
-        // Run file list
         for (uint32_t i=0; i < refCount; i++) {
             uint8_t ptrBytes[4];
             for (uint8_t a=0; a < 4; a++) 
                 ptrBytes[a] = buffer[ (i * 4) + a ];
             
             uint32_t fileHandle = *((uint32_t*)&ptrBytes[0]);
-            uint32_t fileSize = fsFileGetSize(part, fileHandle);
+            if (file != fileHandle) 
+                continue;
             
-            // Print attributes
-            uint8_t fileAttr[] = "    ";
-            fsFileGetAttributes(part, fileHandle, fileAttr);
-            fileAttr[3] = '\0';
+            fsFileDelete(part, file);
             
-            printf((char*)fileAttr);
-            printf(" ");
+            // Replace the entry with the last entry
+            for (uint8_t a=0; a < 4; a++) {
+                buffer[ (i * 4) + a ] = buffer[ ((refCount-1) * 4) + a ];
+                buffer[ ((refCount-1) * 4) + a ] = ' ';
+            }
+            fsFileWrite(part, index, buffer, directorySize);
             
-            // Print file name
-            uint8_t filename[] = "          ";
-            fsFileGetName(part, fileHandle, filename);
-            printf((char*)filename);
+            fsDirectorySetReferenceCount(part, handle, refCount-1);
+            fsFileClose(index);
             
-            // Print file size
-            printf(" %u", fileSize);
-            printf("\n");
+            // Check to delete the extent if its empty
+            if (refCount <= 1 && extentCount > 0) {
+                
+                // Bypass this link in the list
+                uint32_t next   = fsFileGetNextAddress(part, handle);
+                uint32_t parent = fsFileGetParentAddress(part, handle);
+                
+                fsFileSetNextAddress(part, parent, next);
+                fsFileSetParentAddress(part, next, parent);
+                
+                fsFileDelete(part, handle);
+            }
             
+            return 1;
         }
         fsFileClose(index);
         
         handle = fsFileGetNextAddress(part, handle);
+        extentCount++;
         if (handle == 0) 
             break;
     }
