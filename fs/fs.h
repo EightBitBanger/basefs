@@ -10,18 +10,18 @@
 #define SECTOR_HEADER  'U'
 #define SECTOR_USED    'D'
 
-#define DEVICE_OFFSET_TYPE        11 // uint8      Device type specifier
-#define DEVICE_OFFSET_CAPACITY    12 // uint32     Max capacity of the device in bytes
-#define DEVICE_OFFSET_ROOT        16 // uint32     Pointer to the root directory
-#define DEVICE_OFFSET_SECT_SZ     20 // uint32     Size of a sector
+#define DEVICE_OFFSET_TYPE        11  // uint8      Device type specifier
+#define DEVICE_OFFSET_CAPACITY    12  // uint32     Max capacity of the device in bytes
+#define DEVICE_OFFSET_ROOT        16  // uint32     Pointer to the root directory
+#define DEVICE_OFFSET_SECT_SZ     20  // uint32     Size of a sector
 
-#define FILE_OFFSET_NAME          1
-#define FILE_OFFSET_SIZE          11
-#define FILE_OFFSET_ATTRIBUTES    15
-#define FILE_OFFSET_REF_COUNT     19
-#define FILE_OFFSET_FLAG          23
-#define FILE_OFFSET_PARENT        24
-#define FILE_OFFSET_NEXT          28
+#define FILE_OFFSET_NAME          1   // 10 bytes   Name of the file
+#define FILE_OFFSET_SIZE          11  // uint32_t   Size of the file (in bytes)
+#define FILE_OFFSET_ATTRIBUTES    15  // 4 bytes    File attributes
+#define FILE_OFFSET_REF_COUNT     19  // uint32_t   For a directory this counts how many sub-entries this directory/extent contains
+#define FILE_OFFSET_FLAG          23  // uint8_t    Flag bits
+#define FILE_OFFSET_PARENT        24  // Pointer to the parent extent. 0 makes this the root.
+#define FILE_OFFSET_NEXT          28  // Pointer to the next extent. 0 makes this the final extent.
 
 #define FS_FILE_NOT_FOUND   (-2)
 #define FS_FILE_INVALID     (-1)
