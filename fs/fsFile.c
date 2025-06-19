@@ -29,6 +29,22 @@ FileHandle fsFileDelete(struct Partition part, FileHandle handle) {
     return handle;
 }
 
+FileHandle fsFileExtentCreate(struct Partition part, uint32_t size, uint32_t parentPtr, uint32_t nextPtr) {
+    uint8_t filename[] = "EXTENT";
+    FileHandle handle = fsFileCreate(part, filename, size);
+    
+    // Set number of entries in this directory extent
+    fsDirectorySetReferenceCount(part, handle, 0);
+    // Mark as an extent 'E'
+    fsFileSetAttributes(part, handle, (uint8_t*)" rwE");
+    
+    // Set the extent chain
+    fsFileSetNextAddress(part, handle, nextPtr);
+    fsFileSetParentAddress(part, handle, parentPtr);
+    
+    return handle;
+}
+
 
 File fsFileOpen(struct Partition part, FileHandle handle) {
     uint8_t index = 0;

@@ -57,6 +57,8 @@ void fsDeviceFormat(struct Partition part, uint32_t begin, uint32_t end, uint32_
 FileHandle fsFileCreate(struct Partition part, uint8_t* filename, uint32_t size);
 FileHandle fsFileDelete(struct Partition part, FileHandle handle);
 
+FileHandle fsFileExtentCreate(struct Partition part, uint32_t size, uint32_t parentPtr, uint32_t nextPtr);
+
 uint32_t fsAllocate(struct Partition part, uint32_t size);
 void fsFree(struct Partition part, uint32_t address);
 
@@ -64,6 +66,7 @@ void fsFree(struct Partition part, uint32_t address);
 
 DirectoryHandle fsDirectoryCreate(struct Partition part, uint8_t* filename);
 DirectoryHandle fsDirectoryDelete(struct Partition part, DirectoryHandle handle);
+
 DirectoryHandle fsDirectoryExtentCreate(struct Partition part, uint32_t parentPtr, uint32_t nextPtr);
 
 void fsDirectorySetReferenceCount(struct Partition part, DirectoryHandle handle, uint32_t count);
