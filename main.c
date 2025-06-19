@@ -26,9 +26,9 @@ int main() {
     DirectoryHandle rootHandle = fsDeviceGetRootDirectory(part);
     
     
-    for (uint32_t aa=0; aa < (1024 * 32); aa++) {
+    for (uint32_t aa=0; aa < 1; aa++) {
     
-    for (uint8_t i=0; i < 32; i++) {
+    for (uint8_t i=0; i < 64; i++) {
         uint8_t filename[] = "file( )";
         filename[5] = 'A' + i;
         FileHandle fileHandle = fsFileCreate(part, filename, 20);
@@ -36,13 +36,15 @@ int main() {
         fsDirectoryAddFile(part, rootHandle, fileHandle);
     }
     
-    for (uint8_t i=0; i < 32; i++) {
+    /*
+    for (uint8_t i=0; i < 64; i++) {
         uint8_t filename[] = "file( )";
         filename[5] = 'A' + i;
         
         uint32_t fileHandle = fsDirectoryFindByName(part, rootHandle, filename);
         fsDirectoryRemoveFile(part, rootHandle, fileHandle);
     }
+    */
     }
     
     vfsList(part, rootHandle);

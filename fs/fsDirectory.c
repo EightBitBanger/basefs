@@ -29,7 +29,7 @@ DirectoryHandle fsDirectoryExtentCreate(struct Partition part, uint32_t parentPt
     // Set number of entries in this directory extent
     fsDirectorySetReferenceCount(part, handle, 0);
     // Mark as an extent 'E'
-    fsFileSetAttributes(part, handle, (uint8_t*)"    ");
+    fsFileSetAttributes(part, handle, (uint8_t*)" rwE");
     
     // Set the extent chain
     fsFileSetNextAddress(part, handle, nextPtr);
