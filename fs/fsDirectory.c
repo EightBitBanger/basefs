@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 
+void fs_write_byte(uint32_t address, uint8_t data);
+void fs_read_byte(uint32_t address, uint8_t* data);
+
+
 DirectoryHandle fsDirectoryCreate(struct Partition part, uint8_t* filename) {
     FileHandle handle = fsFileCreate(part, filename, 30);
     

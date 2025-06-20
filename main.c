@@ -79,8 +79,8 @@ int main() {
     fsDirectoryAddFile(part, subDirectory, fileHandle);
     
     
-    DrawConsoleOutput(part);
-    //vfsList(part, subDirectory);
+    //DrawConsoleOutput(part);
+    vfsList(part, subDirectory);
     
     
     uint8_t findFilename[] = "file";

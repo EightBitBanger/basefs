@@ -42,9 +42,6 @@ struct Partition {
 
 void fsInit(void);
 
-void fs_write_byte(uint32_t address, uint8_t data);
-void fs_read_byte(uint32_t address, uint8_t* data);
-
 // Partition
 
 struct Partition fsDeviceOpen(uint32_t deviceAddress);

@@ -1,5 +1,8 @@
 #include <fs/fs.h>
 
+void fs_write_byte(uint32_t address, uint8_t data);
+void fs_read_byte(uint32_t address, uint8_t* data);
+
 uint32_t fsAllocate(struct Partition part, uint32_t size) {
     uint32_t address = 0;
     uint32_t numberOfSectors = (size / (part.sector_size - 1)) + 1;
