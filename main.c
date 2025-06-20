@@ -69,49 +69,30 @@ int main() {
     }
     
     DirectoryHandle rootHandle = fsDeviceGetRootDirectory(part);
-    uint32_t numberOfTestFiles = 128;
-    for (uint8_t i=0; i < numberOfTestFiles; i++) {
-        uint8_t filename[] = "file( )";
-        filename[5] = 'A' + i;
-        FileHandle fileHandle = fsFileCreate(part, filename, 20);
-        
-        fsDirectoryAddFile(part, rootHandle, fileHandle);
-    }
+    
+    uint8_t subDirName[] = "subdir";
+    uint32_t subDirectory = fsDirectoryCreate(part, subDirName);
+    fsDirectoryAddFile(part, rootHandle, subDirectory);
+    
+    uint8_t filename[] = "file";
+    FileHandle fileHandle = fsFileCreate(part, filename, 20);
+    fsDirectoryAddFile(part, subDirectory, fileHandle);
+    
     
     DrawConsoleOutput(part);
+    //vfsList(part, subDirectory);
     
-    while (1) {
-        
-        for (uint8_t i=0; i < numberOfTestFiles; i++) {
-            uint8_t filename[] = "file( )";
-            filename[5] = 'A' + i;
-            
-            uint32_t fileHandle = fsDirectoryFindByName(part, rootHandle, filename);
-            fsDirectoryRemoveFile(part, rootHandle, fileHandle);
-        }
-        
-        if (_kbhit()) {
-            _getch();
-            break;
-        }
-        
-        for (uint8_t i=0; i < numberOfTestFiles; i++) {
-            uint8_t filename[] = "file( )";
-            filename[5] = 'A' + i;
-            FileHandle fileHandle = fsFileCreate(part, filename, 20);
-            
-            fsDirectoryAddFile(part, rootHandle, fileHandle);
-        }
-        
-    }
     
-    DrawConsoleOutput(part);
-    usleep(100 * 1000);
+    uint8_t findFilename[] = "file";
+    uint32_t findFileHandle = fsDirectoryFindByName(part, rootHandle, findFilename);
+    fsDirectoryRemoveFile(part, rootHandle, findFileHandle);
+    
     
     free(block);
     
     printf("\n\n");
     while(1){}
+    
     return 0;
 }
 

@@ -28,8 +28,14 @@ uint8_t vfsList(struct Partition part, DirectoryHandle handle) {
             // Print attributes
             uint8_t fileAttr[] = "    ";
             fsFileGetAttributes(part, fileHandle, fileAttr);
-            fileAttr[3] = '\0';
             
+            // Check directory
+            uint8_t isDirectory = 0;
+            if (fileAttr[3] == 'd') {
+                isDirectory = 1;
+            }
+            
+            fileAttr[3] = '\0';
             printf((char*)fileAttr);
             printf(" ");
             
@@ -37,10 +43,15 @@ uint8_t vfsList(struct Partition part, DirectoryHandle handle) {
             uint8_t filename[] = "          ";
             fsFileGetName(part, fileHandle, filename);
             printf((char*)filename);
+            printf(" ");
             
             // Print file size
-            printf(" %u", fileSize);
-            printf("\n");
+            if (isDirectory == 0) {
+                printf("%u", fileSize);
+                printf("\n");
+            } else {
+                printf("<DIR>\n");
+            }
             
         }
         fsFileClose(index);
