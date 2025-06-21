@@ -59,7 +59,7 @@ int main() {
     fsInit();
     
     struct Partition partA = fsDeviceOpen(0x00000000);
-    fsDeviceFormat(partA, 0x000, 0x8000, 32);
+    fsDeviceFormat(&partA, 0x00000, 0x1000, 32);
     
     struct Partition part = fsDeviceOpen(0x00000000);
     
