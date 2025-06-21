@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define FILE_NAME_LENGTH  10
+
 #define MAX_OPEN_FILES  16
 
 #define SECTOR_FREE    '?'
