@@ -129,28 +129,14 @@ uint8_t fsDirectoryAddFile(struct Partition part, DirectoryHandle handle, uint32
 }
 
 uint32_t fsDirectoryGetTotalSize(struct Partition part, DirectoryHandle handle) {
-    uint8_t buffer[64];
     uint32_t total = 0;
-    
     while (1) {
-        uint32_t refCount = fsDirectoryGetReferenceCount(part, handle);
-        
-        File index = fsFileOpen(part, handle);
-        uint32_t directorySize = fsFileGetSize(part, handle);
-        
-        fsFileRead(part, index, buffer, directorySize);
-        
-        // Count the list of files in this extent
-        for (uint32_t i=0; i < refCount; i++) 
-            total++;
-        
-        fsFileClose(index);
+        total += fsDirectoryGetReferenceCount(part, handle);
         
         handle = fsFileGetNextAddress(part, handle);
         if (handle == 0) 
             break;
     }
-    
     return total;
 }
 
@@ -161,10 +147,10 @@ uint32_t fsDirectoryFindByIndex(struct Partition part, DirectoryHandle handle, u
     while (1) {
         uint32_t refCount = fsDirectoryGetReferenceCount(part, handle);
         
-        File index = fsFileOpen(part, handle);
+        File fileIndex = fsFileOpen(part, handle);
         uint32_t directorySize = fsFileGetSize(part, handle);
         
-        fsFileRead(part, index, buffer, directorySize);
+        fsFileRead(part, fileIndex, buffer, directorySize);
         
         // Check the list of files in this extent
         for (uint32_t i=0; i < refCount; i++) {
@@ -177,13 +163,13 @@ uint32_t fsDirectoryFindByIndex(struct Partition part, DirectoryHandle handle, u
                 
                 uint32_t fileHandle = *((uint32_t*)&ptrBytes[0]);
                 
-                fsFileClose(index);
+                fsFileClose(fileIndex);
                 return fileHandle;
             }
             
             counter++;
         }
-        fsFileClose(index);
+        fsFileClose(fileIndex);
         
         handle = fsFileGetNextAddress(part, handle);
         if (handle == 0) 

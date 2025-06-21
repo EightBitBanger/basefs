@@ -76,23 +76,25 @@ int main() {
     
     uint8_t filename[] = "file";
     FileHandle fileHandle = fsFileCreate(part, filename, 20);
-    fsDirectoryAddFile(part, subDirectory, fileHandle);
+    fsDirectoryAddFile(part, rootHandle, fileHandle);
     
     
     //DrawConsoleOutput(part);
-    vfsList(part, subDirectory);
+    vfsList(part, rootHandle);
     
     
-    uint8_t findFilename[] = "file";
-    uint32_t findFileHandle = fsDirectoryFindByName(part, rootHandle, findFilename);
-    fsDirectoryRemoveFile(part, rootHandle, findFileHandle);
+    //uint8_t findFilename[] = "file";
+    //uint32_t findFileHandle = fsDirectoryFindByName(part, rootHandle, findFilename);
+    //fsDirectoryRemoveFile(part, rootHandle, findFileHandle);
+    
+    uint32_t dirSz = fsDirectoryGetTotalSize(part, rootHandle);
+    printf("\n%u", dirSz);
+    
+    printf("\n\n");
     
     
     free(block);
-    
-    printf("\n\n");
     while(1){}
-    
     return 0;
 }
 

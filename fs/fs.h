@@ -74,8 +74,10 @@ uint32_t fsDirectoryGetReferenceCount(struct Partition part, DirectoryHandle han
 uint8_t fsDirectoryAddFile(struct Partition part, DirectoryHandle handle, uint32_t file);
 uint8_t fsDirectoryRemoveFile(struct Partition part, DirectoryHandle handle, uint32_t file);
 
-uint32_t fsDirectoryFindByName(struct Partition part, DirectoryHandle handle, uint8_t* filename);
+uint32_t fsDirectoryGetTotalSize(struct Partition part, DirectoryHandle handle);
+
 uint32_t fsDirectoryFindByIndex(struct Partition part, DirectoryHandle handle, uint32_t index);
+uint32_t fsDirectoryFindByName(struct Partition part, DirectoryHandle handle, uint8_t* filename);
 
 // File IO
 
