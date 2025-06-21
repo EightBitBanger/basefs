@@ -128,6 +128,71 @@ uint8_t fsDirectoryAddFile(struct Partition part, DirectoryHandle handle, uint32
     return 1;
 }
 
+uint32_t fsDirectoryGetTotalSize(struct Partition part, DirectoryHandle handle) {
+    uint8_t buffer[64];
+    uint32_t total = 0;
+    
+    while (1) {
+        uint32_t refCount = fsDirectoryGetReferenceCount(part, handle);
+        
+        File index = fsFileOpen(part, handle);
+        uint32_t directorySize = fsFileGetSize(part, handle);
+        
+        fsFileRead(part, index, buffer, directorySize);
+        
+        // Count the list of files in this extent
+        for (uint32_t i=0; i < refCount; i++) 
+            total++;
+        
+        fsFileClose(index);
+        
+        handle = fsFileGetNextAddress(part, handle);
+        if (handle == 0) 
+            break;
+    }
+    
+    return total;
+}
+
+uint32_t fsDirectoryFindByIndex(struct Partition part, DirectoryHandle handle, uint32_t index) {
+    uint8_t buffer[64];
+    uint32_t counter = 0;
+    
+    while (1) {
+        uint32_t refCount = fsDirectoryGetReferenceCount(part, handle);
+        
+        File index = fsFileOpen(part, handle);
+        uint32_t directorySize = fsFileGetSize(part, handle);
+        
+        fsFileRead(part, index, buffer, directorySize);
+        
+        // Check the list of files in this extent
+        for (uint32_t i=0; i < refCount; i++) {
+            // Check index found
+            if (counter == index) {
+                
+                uint8_t ptrBytes[4];
+                for (uint8_t a=0; a < 4; a++) 
+                    ptrBytes[a] = buffer[ (i * 4) + a ];
+                
+                uint32_t fileHandle = *((uint32_t*)&ptrBytes[0]);
+                
+                fsFileClose(index);
+                return fileHandle;
+            }
+            
+            counter++;
+        }
+        fsFileClose(index);
+        
+        handle = fsFileGetNextAddress(part, handle);
+        if (handle == 0) 
+            break;
+    }
+    
+    return 0;
+}
+
 uint32_t fsDirectoryFindByName(struct Partition part, DirectoryHandle handle, uint8_t* filename) {
     uint8_t buffer[64];
     

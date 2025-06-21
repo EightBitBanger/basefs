@@ -75,6 +75,7 @@ uint8_t fsDirectoryAddFile(struct Partition part, DirectoryHandle handle, uint32
 uint8_t fsDirectoryRemoveFile(struct Partition part, DirectoryHandle handle, uint32_t file);
 
 uint32_t fsDirectoryFindByName(struct Partition part, DirectoryHandle handle, uint8_t* filename);
+uint32_t fsDirectoryFindByIndex(struct Partition part, DirectoryHandle handle, uint32_t index);
 
 // File IO
 
