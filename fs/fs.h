@@ -29,6 +29,9 @@
 #define FS_FILE_INVALID     (-1)
 #define FS_FILE_SUCCESS     (0)
 
+#define FS_DEVICE_TYPE_MEMORY   0x00
+#define FS_DEVICE_TYPE_EEPROM   0x1C
+
 typedef uint32_t FileHandle;
 typedef uint32_t DirectoryHandle;
 typedef int32_t  File;
@@ -44,19 +47,30 @@ struct Partition {
 
 void fsInit(void);
 
-// Partition
+// Low level IO
 
-struct Partition fsDeviceOpen(uint32_t deviceAddress);
+void fs_write_byte(uint32_t address, uint8_t data);
+void fs_read_byte(uint32_t address, uint8_t* data);
+void fsDeviceSetType(uint8_t device_type);
+
+// Partition
+void fsDeviceSetCurrent(uint32_t device_address);
+uint32_t fsDeviceGetCurrent(void);
+
+struct Partition fsDeviceOpen(uint32_t device_address);
 uint32_t fsDeviceGetSize(struct Partition part);
 uint32_t fsDeviceGetSectorSize(struct Partition part);
 DirectoryHandle fsDeviceGetRootDirectory(struct Partition part);
 
-void fsDeviceFormat(struct Partition* part, uint32_t begin, uint32_t end, uint32_t sectorSize);
+void fsDeviceFormat(struct Partition* part, uint32_t begin, uint32_t end, uint32_t sector_size, uint8_t device_type, uint8_t* device_name);
+void fsDeviceFormatLow(struct Partition* part, uint32_t begin, uint32_t end, uint32_t sector_size, uint8_t device_type);
 
-// Allocation
+uint8_t fsDeviceConstructAllocationTable(struct Partition* part, uint8_t device_type, uint8_t* device_name);
+
+// Files
 
 FileHandle fsFileCreate(struct Partition part, uint8_t* filename, uint32_t size);
-FileHandle fsFileDelete(struct Partition part, FileHandle handle);
+uint8_t fsFileDelete(struct Partition part, FileHandle handle);
 
 FileHandle fsFileExtentCreate(struct Partition part, uint32_t size, uint32_t parentPtr, uint32_t nextPtr);
 
@@ -66,9 +80,10 @@ void fsFree(struct Partition part, uint32_t address);
 // Directories
 
 DirectoryHandle fsDirectoryCreate(struct Partition part, uint8_t* filename);
-DirectoryHandle fsDirectoryDelete(struct Partition part, DirectoryHandle handle);
+uint8_t fsDirectoryDelete(struct Partition part, DirectoryHandle handle);
 
 DirectoryHandle fsDirectoryExtentCreate(struct Partition part, uint32_t parentPtr, uint32_t nextPtr);
+DirectoryHandle fsDirectoryMountCreate(struct Partition part, struct Partition targetPart, DirectoryHandle targetHandle);
 
 void fsDirectorySetReferenceCount(struct Partition part, DirectoryHandle handle, uint32_t count);
 uint32_t fsDirectoryGetReferenceCount(struct Partition part, DirectoryHandle handle);
@@ -80,6 +95,9 @@ uint32_t fsDirectoryGetTotalSize(struct Partition part, DirectoryHandle handle);
 
 uint32_t fsDirectoryFindByIndex(struct Partition part, DirectoryHandle handle, uint32_t index);
 uint32_t fsDirectoryFindByName(struct Partition part, DirectoryHandle handle, uint8_t* filename);
+
+uint32_t fsFindFile(struct Partition part, DirectoryHandle handle, uint8_t* filename);
+uint32_t fsFindDirectory(struct Partition part, DirectoryHandle handle, uint8_t* filename);
 
 // File IO
 
@@ -105,8 +123,25 @@ uint32_t fsFileGetParentAddress(struct Partition part, FileHandle handle);
 void fsFileSetNextAddress(struct Partition part, FileHandle handle, uint32_t next);
 uint32_t fsFileGetNextAddress(struct Partition part, FileHandle handle);
 
+// Working directory
+
+void fsWorkingDirectorySetRoot(struct Partition part, DirectoryHandle handle);
+DirectoryHandle fsWorkingDirectoryGetRoot(void);
+
+void fsWorkingDirectoryChange(struct Partition part, DirectoryHandle handle);
+DirectoryHandle fsWorkingDirectoryGetCurrent(void);
+
+uint8_t fsWorkingDirectorySetParent(void);
+
+uint8_t fsWorkingDirectoryGetIndex(void);
+
+
+void fsParsePath(struct Partition part, uint8_t* path);
+
 // Virtual file system
 
 uint8_t vfsList(struct Partition part, DirectoryHandle handle);
+
+
 
 #endif

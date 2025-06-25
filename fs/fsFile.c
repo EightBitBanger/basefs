@@ -25,11 +25,11 @@ FileHandle fsFileCreate(struct Partition part, uint8_t* filename, uint32_t size)
     return handle;
 }
 
-FileHandle fsFileDelete(struct Partition part, FileHandle handle) {
+uint8_t fsFileDelete(struct Partition part, FileHandle handle) {
     
     fsFree(part, handle);
     
-    return handle;
+    return 1;
 }
 
 FileHandle fsFileExtentCreate(struct Partition part, uint32_t size, uint32_t parentPtr, uint32_t nextPtr) {
@@ -106,7 +106,7 @@ uint8_t fsFileWrite(struct Partition part, File index, uint8_t* buffer, uint32_t
         
         uint32_t positionOffset = part.sector_size + sector + 1;
         
-        fs_write_byte(fileList[index] + positionOffset, buffer[i]);
+        fs_write_byte(part.block_address + fileList[index] + positionOffset, buffer[i]);
         
         sectorCounter++;
         sector++;
@@ -136,7 +136,7 @@ uint8_t fsFileRead(struct Partition part, File index, uint8_t* buffer, uint32_t 
         
         uint32_t positionOffset = part.sector_size + sector + 1;
         
-        fs_read_byte(fileList[index] + positionOffset, &buffer[i]);
+        fs_read_byte(part.block_address + fileList[index] + positionOffset, &buffer[i]);
         
         sectorCounter++;
         sector++;
@@ -146,9 +146,7 @@ uint8_t fsFileRead(struct Partition part, File index, uint8_t* buffer, uint32_t 
 
 
 void fsFileGetName(struct Partition part, FileHandle handle, uint8_t* name) {
-    //for (uint8_t i=0; i < 10; i++) 
-    //    name[i] = ' ';
-    for (uint8_t i=0; i < 10; i++) {
+    for (uint8_t i=0; i < FILE_NAME_LENGTH; i++) {
         fs_read_byte(part.block_address + handle + i + FILE_OFFSET_NAME, &name[i]);
         if (name[i] == '\0') {
             name[i] = ' ';
@@ -160,15 +158,15 @@ void fsFileGetName(struct Partition part, FileHandle handle, uint8_t* name) {
 
 void fsFileSetName(struct Partition part, FileHandle handle, uint8_t* name) {
     // Clean up the file name
-    uint8_t filename[10];
-    for (uint32_t i=0; i < 10; i++) 
+    uint8_t filename[FILE_NAME_LENGTH];
+    for (uint32_t i=0; i < FILE_NAME_LENGTH; i++) 
         filename[i] = ' ';
-    for (uint32_t i=0; i < 10; i++) {
+    for (uint32_t i=0; i < FILE_NAME_LENGTH; i++) {
         if (name[i] == '\0') 
             break;
         filename[i] = name[i];
     }
-    for (uint32_t i=0; i < 10; i++) 
+    for (uint32_t i=0; i < FILE_NAME_LENGTH; i++) 
         fs_write_byte(part.block_address + handle + i + FILE_OFFSET_NAME, filename[i]);
     return;
 }
