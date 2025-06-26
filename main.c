@@ -31,33 +31,36 @@ int main() {
     fsDeviceFormat(&partB, 0, 32 * 20, 32, 0x00, (uint8_t*)"ssd1");
     
     DirectoryHandle rootHandleA = fsDeviceGetRootDirectory(partA);
-    //DirectoryHandle rootHandleB = fsDeviceGetRootDirectory(partB);
+    DirectoryHandle rootHandleB = fsDeviceGetRootDirectory(partB);
+    
+    fsWorkingDirectorySetRoot(partA, rootHandleA);
     
     {
-    uint32_t subDirectory = fsDirectoryCreate(partA, (uint8_t*)"sub");
-    fsDirectoryAddFile(partA, rootHandleA, subDirectory);
-    }
-    {
-    FileHandle fileHandle = fsFileCreate(partA, (uint8_t*)"file", 20);
-    fsDirectoryAddFile(partA, rootHandleA, fileHandle);
-    }
+    FileHandle fileHandleA = fsFileCreate(partA, (uint8_t*)"file", 10);
+    fsDirectoryAddFile(partA, rootHandleA, fileHandleA);
+    FileHandle fileHandleB = fsFileCreate(partB, (uint8_t*)"file", 20);
+    fsDirectoryAddFile(partB, rootHandleB, fileHandleB);
+    FileHandle dirHandleB = fsDirectoryCreate(partB, (uint8_t*)"subdir");
+    fsDirectoryAddFile(partB, rootHandleB, dirHandleB);
     
-    
-    uint32_t subDirectory = fsDirectoryCreate(partB, (uint8_t*)"dir_test");
-    fsDirectoryAddFile(partA, rootHandleA, subDirectory);
-    
-    
-    
-    
-    uint32_t mountedSubDirectory = fsDirectoryMountCreate(partA, partB, subDirectory);
+    uint32_t mountedSubDirectory = fsDirectoryMountCreate(partA, partB, rootHandleB);
     fsDirectoryAddFile(partA, rootHandleA, mountedSubDirectory);
     
+    fsWorkingDirectoryChange(partA, mountedSubDirectory);
+    
+    }
     
     
     
     
-    DrawConsoleOutput(partA);
-    //vfsList(partA, rootHandle);
+    
+    //DrawConsoleOutput(partA);
+    
+    uint32_t deviceAddress = fsDeviceGetCurrent();
+    struct Partition partDir = fsDeviceOpen(deviceAddress);
+    DirectoryHandle rootDir = fsWorkingDirectoryGetRoot();
+    
+    vfsList(partDir, rootDir);
     
     //uint32_t dirSz = fsDirectoryGetTotalSize(partA, rootHandleA);
     //printf("\n%u", dirSz);
